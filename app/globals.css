@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background-color: #F8F3E8;
+  color: #1A1712;
+}
+
+.noise-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(26,23,18,0.04) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.tier-card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.tier-card:hover {
+  transform: translateY(-2px);
+}
+
+::selection {
+  background: #C9A227;
+  color: #FDFBF5;
+}
