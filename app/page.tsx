@@ -4,11 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import { BrowserProvider, parseEther, toBeHex } from "ethers";
 
 const FEE_RECEIVER = "0x580Aab97021D7D379c8d26444eAae332C3014ba7";
-const FEE_ETH = "0.00004";
+const FEE_ETH = "0.00001";
 const BASE_CHAIN_ID = 8453;
 const BASE_CHAIN_HEX = "0x2105";
 const TOKEN_NAME = "Base Terminal";
 const TOKEN_TICKER = "TBASE";
+const TOTAL_SUPPLY = "1,000,000,000";
 
 type Tier = {
   key: string;
@@ -24,6 +25,15 @@ const TIERS: Tier[] = [
   { key: "relay", label: "Relay", min: 0.4, max: 0.7, allocation: 1500, color: "#B8935A" },
   { key: "uplink", label: "Uplink", min: 0.7, max: 0.9, allocation: 3500, color: "#C9A227" },
   { key: "core", label: "Core Node", min: 0.9, max: 1.01, allocation: 7500, color: "#7A5C1E" },
+];
+
+type TokenomicsItem = { label: string; pct: number; color: string };
+
+const TOKENOMICS: TokenomicsItem[] = [
+  { label: "Airdrop", pct: 35, color: "#C9A227" },
+  { label: "Liquidity", pct: 30, color: "#7A5C1E" },
+  { label: "Team", pct: 20, color: "#B8935A" },
+  { label: "Treasury", pct: 15, color: "#9C7A3F" },
 ];
 
 function tierFor(score: number): Tier {
@@ -139,7 +149,6 @@ export default function Page() {
     try {
       const provider = (window as any).__ethProvider;
 
-      // confirm chain is Base before sending
       const currentChain: string = await provider.request({ method: "eth_chainId" });
       if (currentChain?.toLowerCase() !== BASE_CHAIN_HEX) {
         try {
@@ -155,13 +164,9 @@ export default function Page() {
       const browserProvider = new BrowserProvider(provider);
       const signer = await browserProvider.getSigner();
 
-      // 1. Sign a verification message (free)
       const message = `Register for ${TOKEN_NAME} ($${TOKEN_TICKER}) Airdrop\nFID: ${fcUser.fid}\nWallet: ${address}\nNeynar Score: ${score.toFixed(2)}`;
       const signature = await signer.signMessage(message);
 
-      // 2. Pay small registration fee on Base — raw eth_sendTransaction,
-      // bypassing ethers' automatic gas estimation which some in-app
-      // wallets reject with a false CALL_EXCEPTION on plain transfers.
       const valueHex = toBeHex(parseEther(FEE_ETH));
       const txHashResult: string = await provider.request({
         method: "eth_sendTransaction",
@@ -179,7 +184,6 @@ export default function Page() {
 
       const tier = tierFor(score);
 
-      // 3. Save registration
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -332,6 +336,63 @@ export default function Page() {
             {errorMsg && <p className="text-xs text-red-700 text-center">{errorMsg}</p>}
           </div>
         )}
+      </div>
+
+      {/* Tokenomics */}
+      <div className="w-full max-w-md mt-6 bg-cream-50 border border-ink/10 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="font-display italic text-xl text-ink">Tokenomics</h2>
+          <span className="font-mono text-[11px] uppercase tracking-widest text-ink/40">
+            {TOTAL_SUPPLY} {TOKEN_TICKER}
+          </span>
+        </div>
+        <p className="font-body text-xs text-ink/50 mb-4">Total supply distribution</p>
+
+        <div className="w-full h-3 rounded-full overflow-hidden flex mb-4 border border-ink/10">
+          {TOKENOMICS.map((item) => (
+            <div
+              key={item.label}
+              style={{ width: `${item.pct}%`, backgroundColor: item.color }}
+            />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {TOKENOMICS.map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="font-body text-sm text-ink/70">{item.label}</span>
+              <span className="font-mono text-sm font-semibold text-ink ml-auto">
+                {item.pct}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Listing Update */}
+      <div className="w-full max-w-md mt-6 bg-cream-50 border border-gold-400/40 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display italic text-xl text-ink">Listing Update</h2>
+          <span className="font-mono text-[10px] uppercase tracking-widest bg-gold-400/15 text-gold-600 border border-gold-400/40 px-2 py-1 rounded-full">
+            Upcoming
+          </span>
+        </div>
+        <p className="font-body text-sm text-ink/70 leading-relaxed">
+          <span className="font-display italic text-ink/90">
+            ${TOKEN_TICKER} launches on a Base-native DEX
+          </span>{" "}
+          (Uniswap / Aerodrome) with initial liquidity seeded from the treasury allocation.
+        </p>
+        <div className="flex justify-between items-center mt-4 pt-4 border-t border-ink/10">
+          <span className="font-mono text-[11px] uppercase tracking-widest text-ink/50">
+            Target Window
+          </span>
+          <span className="font-mono text-sm font-semibold text-ink">Q4 2026</span>
+        </div>
       </div>
 
       <p className="font-mono text-[10px] text-ink/35 mt-8 tracking-widest uppercase">
