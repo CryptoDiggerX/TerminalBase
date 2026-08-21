@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { BrowserProvider, formatEther, parseEther } from "ethers";
 
 const FEE_RECEIVER = "0x580Aab97021D7D379c8d26444eAae332C3014ba7";
-const FEE_ETH = "0.000033";
+const FEE_ETH = "0.00004";
 const BASE_CHAIN_ID = 8453;
 const BASE_CHAIN_HEX = "0x2105";
 const TOKEN_NAME = "Base Terminal";
