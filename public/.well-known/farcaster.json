@@ -1,18 +1,13 @@
 {
-  "accountAssociation": {
-    "header": "REPLACE_WITH_HEADER_FROM_WARPCAST_MANIFEST_TOOL",
-    "payload": "REPLACE_WITH_PAYLOAD_FROM_WARPCAST_MANIFEST_TOOL",
-    "signature": "REPLACE_WITH_SIGNATURE_FROM_WARPCAST_MANIFEST_TOOL"
-  },
   "miniapp": {
     "version": "1",
     "name": "Base Terminal",
-    "iconUrl": "https://base-terminal.vercel.app/icon.png",
-    "homeUrl": "https://base-terminal.vercel.app",
-    "imageUrl": "https://base-terminal.vercel.app/og-image.png",
+    "iconUrl": "https://terminalbase.vercel.app/icon.png",
+    "homeUrl": "https://terminalbase.vercel.app",
+    "imageUrl": "https://terminalbase.vercel.app/og-image.png",
     "buttonTitle": "Register for $TBASE",
-    "splashImageUrl": "https://base-terminal.vercel.app/splash.png",
+    "splashImageUrl": "https://terminalbase.vercel.app/splash.png",
     "splashBackgroundColor": "#F8F3E8",
-    "webhookUrl": "https://base-terminal.vercel.app/api/webhook"
+    "webhookUrl": "https://terminalbase.vercel.app/api/webhook"
   }
 }
