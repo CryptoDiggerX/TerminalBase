@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { BrowserProvider, formatEther, parseEther } from "ethers";
+import { BrowserProvider, parseEther, toBeHex } from "ethers";
 
 const FEE_RECEIVER = "0x580Aab97021D7D379c8d26444eAae332C3014ba7";
 const FEE_ETH = "0.00001";
@@ -138,22 +138,48 @@ export default function Page() {
     setErrorMsg(null);
     try {
       const provider = (window as any).__ethProvider;
+
+      // confirm chain is Base before sending
+      const currentChain: string = await provider.request({ method: "eth_chainId" });
+      if (currentChain?.toLowerCase() !== BASE_CHAIN_HEX) {
+        try {
+          await provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: BASE_CHAIN_HEX }],
+          });
+        } catch {
+          throw new Error("Please switch your wallet to Base Mainnet and try again.");
+        }
+      }
+
       const browserProvider = new BrowserProvider(provider);
       const signer = await browserProvider.getSigner();
 
+      // 1. Sign a verification message (free)
       const message = `Register for ${TOKEN_NAME} ($${TOKEN_TICKER}) Airdrop\nFID: ${fcUser.fid}\nWallet: ${address}\nNeynar Score: ${score.toFixed(2)}`;
       const signature = await signer.signMessage(message);
 
-      const tx = await signer.sendTransaction({
-        to: FEE_RECEIVER,
-        value: parseEther(FEE_ETH),
-        gasLimit: 30000n,
+      // 2. Pay small registration fee on Base — raw eth_sendTransaction,
+      // bypassing ethers' automatic gas estimation which some in-app
+      // wallets reject with a false CALL_EXCEPTION on plain transfers.
+      const valueHex = toBeHex(parseEther(FEE_ETH));
+      const txHashResult: string = await provider.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: address,
+            to: FEE_RECEIVER,
+            value: valueHex,
+            gas: toBeHex(30000),
+          },
+        ],
       });
-      setTxHash(tx.hash);
-      await tx.wait?.(1).catch(() => {});
+
+      setTxHash(txHashResult);
 
       const tier = tierFor(score);
 
+      // 3. Save registration
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -166,7 +192,7 @@ export default function Page() {
           allocation: tier.allocation,
           signature,
           message,
-          txHash: tx.hash,
+          txHash: txHashResult,
         }),
       });
       if (!res.ok) throw new Error("Failed to save registration");
