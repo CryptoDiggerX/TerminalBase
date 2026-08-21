@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { BrowserProvider, formatEther, parseEther } from "ethers";
 
 const FEE_RECEIVER = "0x580Aab97021D7D379c8d26444eAae332C3014ba7";
-const FEE_ETH = "0.00005";
+const FEE_ETH = "0.000033";
 const BASE_CHAIN_ID = 8453;
 const BASE_CHAIN_HEX = "0x2105";
 const TOKEN_NAME = "Base Terminal";
@@ -299,9 +299,7 @@ export default function Page() {
                 disabled={step === "registering" || scoreLoading}
                 className="w-full py-3.5 rounded-xl bg-ink text-cream-50 font-body font-semibold text-sm tracking-wide hover:bg-ink/90 transition disabled:opacity-60"
               >
-                {step === "registering"
-                  ? "Confirming in wallet…"
-                  : `Sign & Register (${FEE_ETH} ETH)`}
+                {step === "registering" ? "Confirming in wallet…" : "Sign & Register"}
               </button>
             )}
             {errorMsg && <p className="text-xs text-red-700 text-center">{errorMsg}</p>}
@@ -314,4 +312,4 @@ export default function Page() {
       </p>
     </main>
   );
-                                 }
+}
