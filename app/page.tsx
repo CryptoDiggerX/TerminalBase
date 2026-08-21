@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { BrowserProvider, formatEther, parseEther } from "ethers";
 
 const FEE_RECEIVER = "0x580Aab97021D7D379c8d26444eAae332C3014ba7";
-const FEE_ETH = "0.00002";
+const FEE_ETH = "0.00005";
 const BASE_CHAIN_ID = 8453;
 const BASE_CHAIN_HEX = "0x2105";
 const TOKEN_NAME = "Base Terminal";
@@ -147,6 +147,7 @@ export default function Page() {
       const tx = await signer.sendTransaction({
         to: FEE_RECEIVER,
         value: parseEther(FEE_ETH),
+        gasLimit: 30000n,
       });
       setTxHash(tx.hash);
       await tx.wait?.(1).catch(() => {});
